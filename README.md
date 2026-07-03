@@ -12,7 +12,10 @@
 <strong>Asignatura:</strong> Seguridad de Redes<br>
 <strong>Docente:</strong> Jonathan Esteban Rondon Corniel<br>
 <strong>Fecha de Entrega:</strong> 2 de julio de 2026<br>
-<strong>Video de Exposición:</strong> <a href="https://youtu.be/iFX56J-Er5Y">https://youtu.be/iFX56J-Er5Y</a>
+<strong>Video de Exposición:</strong> <a href="https://youtu.be/iFX56J-Er5Y">https://youtu.be/iFX56J-Er5Y</a><br>
+<strong>Repositorio de GitHub:</strong> <a href="https://github.com/imAlanG16/07_dmvpn_phase2_ikev1_dynamic">https://github.com/imAlanG16/07_dmvpn_phase2_ikev1_dynamic</a>
+</div>
+</div>
 
 ## Objetivo de la VPN
 Implementar una red privada virtual dinámica multipunto (DMVPN - Dynamic Multipoint VPN) de Fase 2, utilizando IPSec con IKEv1 para el cifrado y OSPF como protocolo de enrutamiento dinámico. El objetivo de la Fase 2 de DMVPN es permitir que las sucursales (Spokes) se registren de forma dinámica con la sede principal (Hub) utilizando el protocolo NHRP (Next Hop Resolution Protocol). En esta fase, cuando un Spoke necesita enviar tráfico a otro Spoke, le solicita la resolución de dirección al Hub y establece un túnel GRE dinámico **directamente Spoke-to-Spoke** sin que el tráfico de datos tenga que transitar a través del Hub, optimizando el ancho de banda y reduciendo la latencia de la red corporativa.
@@ -23,6 +26,7 @@ La topología lógica del laboratorio utiliza una nube pública simulada por el 
 <div style="text-align: center; margin: 10px 0;">
   <img src="images/topologia_dmvpn.png" width="480" alt="Topología de Red DMVPN GNS3">
   <p style="font-size: 0.9em; color: #666; font-style: italic;">Topología física del entorno DMVPN de laboratorio en GNS3</p>
+</div>
 
 El direccionamiento configurado para las interfaces físicas y lógicas del laboratorio se detalla a continuación:
 
@@ -36,7 +40,7 @@ El direccionamiento configurado para las interfaces físicas y lógicas del labo
 
 
 
-<div style="page-break-after: always; break-after: page; display: block; height: 1px; overflow: hidden;">
+<div style="page-break-after: always; break-after: page; display: block; height: 1px; overflow: hidden;"></div>
 
 ## Parámetros Criptográficos y de Red
 Los parámetros configurados para la seguridad IPSec y el enrutamiento dinámico en el entorno de Fase 2 son:
@@ -52,7 +56,7 @@ Los parámetros configurados para la seguridad IPSec y el enrutamiento dinámico
 | **OSPF** | Tipo de Red | Broadcast | Habilita adjacencias dinámicas simulando broadcast. |
 
 
-<div style="page-break-after: always; break-after: page; display: block; height: 1px; overflow: hidden;">
+<div style="page-break-after: always; break-after: page; display: block; height: 1px; overflow: hidden;"></div>
 
 ## Explicación de la Configuración y OSPF
 En la Fase 2 de DMVPN, cada Spoke se configura con `tunnel mode gre multipoint` y establece un mapeo estático inicial hacia el Hub (`ip nhrp map 10.10.10.1 1.1.1.1`) y su envío multicast (`ip nhrp map multicast 1.1.1.1`), definiendo al Hub como Next Hop Server (NHS). El Hub utiliza mapeo multicast dinámico para aprender qué Spokes están activos. 
@@ -73,6 +77,9 @@ El Hub reporta a ambos Spokes activos con sus respectivas IPs WAN públicas y su
 <div style="text-align: center; margin: 10px 0;">
   <img src="images/show_dmvpn.png" width="480" alt="Clientes DMVPN registrados en el HUB">
   <p style="font-size: 0.9em; color: #666; font-style: italic;">Salida de show dmvpn en el HUB-P2 mostrando a los dos Spokes registrados dinámicamente</p>
+</div>
+
+</div>
 
 ### 2. Tabla de Mapeo NHRP en los Spokes (Resolución de Siguiente Salto)
 Al ejecutar el comando `show ip nhrp` en `SPOKE1-P2`, se valida la forma en la que la sucursal resuelve el mapeo lógico a físico. Se documentan las siguientes entradas en la base de datos NHRP:
@@ -83,6 +90,9 @@ Al ejecutar el comando `show ip nhrp` en `SPOKE1-P2`, se valida la forma en la q
 <div style="text-align: center; margin: 10px 0;">
   <img src="images/show_ip_nhrp.png" width="480" alt="Mapeos de show ip nhrp en SPOKE1-P2">
   <p style="font-size: 0.9em; color: #666; font-style: italic;">Detalles de la tabla NHRP en SPOKE1-P2 mostrando la ruta aprendida para SPOKE2</p>
+</div>
+
+</div>
 
 ### 3. Asociaciones de Seguridad Criptográfica Activas (ISAKMP SAs)
 La ejecución del comando `show crypto isakmp sa` en el router `SPOKE1-P2` revela un comportamiento dinámico fantástico exclusivo de la Fase 2 de DMVPN. El router mantiene activos los canales seguros bidireccionales con sus contrapartes:
@@ -94,6 +104,9 @@ Esto confirma que el Spoke 1 cifra y negocia sus parámetros ISAKMP de forma tot
 <div style="text-align: center; margin: 10px 0;">
   <img src="images/crypto_isakmp_sa.png" width="480" alt="Asociaciones ISAKMP simultáneas en SPOKE1-P2">
   <p style="font-size: 0.9em; color: #666; font-style: italic;">Asociaciones ISAKMP activas en SPOKE1-P2 con el HUB y el SPOKE2 en simultáneo</p>
+</div>
+
+</div>
 
 ### 4. Asociación de Datos IPSec en el Enlace Directo (Fase 2)
 Al ejecutar el comando `show crypto ipsec sa` en `SPOKE1-P2`, se detalla la SA IPSec de datos establecida directamente hacia el Spoke 2:
@@ -110,6 +123,9 @@ Esto ratifica la existencia de un canal IPSec directo establecido de sucursal a 
 <div style="text-align: center; margin: 10px 0;">
   <img src="images/crypto_ipsec_sa.png" width="480" alt="Salida de show crypto ipsec sa en SPOKE1-P2 hacia SPOKE2">
   <p style="font-size: 0.9em; color: #666; font-style: italic;">Detalles de la SA IPSec dinámica directa entre SPOKE1 y SPOKE2</p>
+</div>
+
+</div>
 
 ### 5. Prueba de Conectividad y Trazado de Ruta Directo Spoke-to-Spoke
 La validación final se realiza desde la consola del cliente VPCS en el extremo de Spoke 1. En primer lugar, se realiza un ping exitoso hacia el host detrás del Hub (`14.3.10.21`). Luego, al enviar paquetes hacia el host de Spoke 2 (`14.3.30.21`), los paquetes se completan de forma exitosa y sin pérdidas.
@@ -122,3 +138,5 @@ Finalmente, al trazar la ruta con `tracer 14.3.30.21`, se comprueba de forma emp
 <div style="text-align: center; margin: 10px 0;">
   <img src="images/ping_spoke_to_spoke.png" width="480" alt="Ping y traceroute directo de Spoke a Spoke">
   <p style="font-size: 0.9em; color: #666; font-style: italic;">Prueba de conectividad desde VPCS validando el salto directo entre subredes de Spokes</p>
+</div>
+</div>
